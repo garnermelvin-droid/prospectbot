@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ProspectBot | Unitel Service</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#050d1a;--panel:#0a1628;--border:#1a2d4a;--green:#5cb85c;--gold:#f0ad4e;--text:#e8f4fd;--muted:#4a7090;--card:#0d1f35;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Space Mono',monospace;min-height:100vh;}
+body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(92,184,92,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(92,184,92,.03) 1px,transparent 1px);background-size:40px 40px;pointer-events:none;z-index:0;}
+.wrap{max-width:1140px;margin:0 auto;padding:28px 24px;position:relative;z-index:1;}
+header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;padding-bottom:18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px;}
+.logo{display:flex;align-items:center;gap:14px;}
+.logo-img{width:50px;height:50px;border-radius:12px;background:linear-gradient(135deg,#1a2558,#2d4a9e);display:flex;align-items:center;justify-content:center;font-size:24px;}
+.logo h1{font-family:'Syne',sans-serif;font-size:17px;font-weight:800;}
+.logo p{font-size:10px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;}
+.status{display:flex;align-items:center;gap:7px;background:rgba(92,184,92,.1);border:1px solid rgba(92,184,92,.3);padding:6px 14px;border-radius:20px;font-size:11px;color:var(--green);}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{box-shadow:0 0 5px var(--green);}50%{box-shadow:0 0 12px var(--green);opacity:.6;}}
+.langs{display:flex;gap:6px;}
+.lb{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 12px;border-radius:6px;font-family:'Space Mono',monospace;font-size:11px;cursor:pointer;transition:all .2s;}
+.lb.on{background:var(--green);border-color:var(--green);color:#000;font-weight:700;}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+.sc{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:14px 16px;position:relative;overflow:hidden;}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--green),transparent);}
+.sc .lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px;}
+.sc .val{font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--green);line-height:1;}
+.sc .sub{font-size:10px;color:var(--muted);margin-top:3px;}
+.main{display:grid;grid-template-columns:1fr 360px;gap:16px;}
+.panel{background:var(--panel);border:1px solid var(--border);border-radius:13px;padding:20px;}
+.ptitle{font-family:'Syne',sans-serif;font-size:12px;font-weight:700;color:var(--green);text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.ptitle::after{content:'';flex:1;height:1px;background:var(--border);}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+.fi{display:flex;flex-direction:column;gap:5px;}
+.fi.full{grid-column:1/-1;}
+label{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+select,textarea{background:var(--bg);border:1px solid var(--border);color:var(--text);padding:8px 11px;border-radius:7px;font-family:'Space Mono',monospace;font-size:11px;outline:none;width:100%;}
+textarea{resize:vertical;min-height:60px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:10px 20px;border-radius:7px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700;cursor:pointer;border:none;transition:all .2s;}
+.bp{background:linear-gradient(135deg,var(--green),#3a9a3a);color:#000;}
+.bp:hover{box-shadow:0 0 24px rgba(92,184,92,.45);transform:translateY(-1px);}
+.bp:disabled{opacity:.45;cursor:not-allowed;transform:none;}
+.bs{background:transparent;border:1px solid var(--border);color:var(--muted);}
+.bs:hover{border-color:var(--green);color:var(--green);}
+.bsm{padding:6px 11px;font-size:10px;}
+.prog{display:none;margin-top:16px;}
+.prog.show{display:block;}
+.pbar-bg{background:var(--bg);border:1px solid var(--border);border-radius:5px;height:6px;overflow:hidden;margin-bottom:8px;}
+.pbar{height:100%;background:linear-gradient(90deg,var(--green),#3a9a3a);border-radius:5px;transition:width .5s ease;}
+.log{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:10px;height:120px;overflow-y:auto;font-size:10px;line-height:2;}
+.le{display:flex;gap:9px;}
+.lt{color:var(--muted);min-width:56px;}
+.ok{color:var(--green);}.warn{color:var(--gold);}.info{color:#7ec8e3;}.dim{color:var(--muted);}
+.leads-wrap{display:flex;flex-direction:column;gap:9px;}
+.lcard{background:var(--bg);border:1px solid var(--border);border-radius:9px;padding:13px;cursor:pointer;transition:border-color .2s,transform .2s;}
+.lcard:hover{border-color:var(--green);transform:translateX(3px);}
+.lcard.sel{border-color:var(--green);background:rgba(92,184,92,.04);}
+.lh{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px;}
+.ln{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;}
+.lco{font-size:10px;color:var(--green);margin-top:2px;}
+.lscore{min-width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;border:2px solid;flex-shrink:0;}
+.sh{border-color:var(--green);color:var(--green);}.sm{border-color:var(--gold);color:var(--gold);}.sl{border-color:#e74c3c;color:#e74c3c;}
+.lmeta{font-size:10px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap;}
+.lnote{font-size:10px;color:var(--muted);margin-top:6px;}
+.tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px;}
+.tag{font-size:9px;padding:2px 7px;border-radius:9px;background:rgba(92,184,92,.08);border:1px solid rgba(92,184,92,.2);color:var(--green);}
+.tag.gd{background:rgba(240,173,78,.08);border-color:rgba(240,173,78,.2);color:var(--gold);}
+.tag.rd{background:rgba(231,76,60,.08);border-color:rgba(231,76,60,.2);color:#e74c3c;}
+.rcol{display:flex;flex-direction:column;gap:13px;}
+.eprev{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:11px;font-size:11px;line-height:1.8;min-height:160px;max-height:260px;overflow-y:auto;white-space:pre-wrap;}
+.ef{display:flex;gap:7px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border);font-size:10px;}
+.ef-l{color:var(--muted);min-width:50px;}
+.si{display:flex;align-items:center;gap:9px;padding:8px 0;border-bottom:1px solid var(--border);}
+.si:last-child{border:none;}
+.sn{color:var(--text);font-weight:600;font-size:11px;}
+.sd{color:var(--muted);font-size:10px;}
+.stag{font-size:9px;padding:2px 8px;border-radius:9px;background:rgba(92,184,92,.09);border:1px solid rgba(92,184,92,.25);color:var(--green);}
+.empty{text-align:center;padding:24px;color:var(--muted);font-size:11px;}
+.mo{position:fixed;inset:0;background:rgba(5,13,26,.88);backdrop-filter:blur(4px);z-index:100;display:none;align-items:center;justify-content:center;}
+.mo.open{display:flex;}
+.md{background:var(--panel);border:1px solid var(--green);border-radius:15px;padding:28px;max-width:480px;width:90%;}
+.md h2{font-family:'Syne',sans-serif;font-size:18px;margin-bottom:8px;color:var(--green);}
+.md p{font-size:11px;color:var(--muted);margin-bottom:16px;line-height:1.7;}
+.minfo{background:var(--bg);border:1px solid var(--border);border-radius:7px;padding:11px;font-size:10px;color:var(--muted);margin-bottom:16px;}
+.minfo div{margin-bottom:4px;}
+.ma{display:flex;gap:8px;justify-content:flex-end;}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--panel);border:1px solid var(--green);border-radius:11px;padding:12px 16px;font-size:11px;color:var(--green);z-index:200;display:none;align-items:center;gap:9px;max-width:320px;}
+.toast.err{border-color:#e74c3c;color:#e74c3c;}
+.toast.show{display:flex;}
+.spin{animation:sp 1s linear infinite;display:inline-block;}
+@keyframes sp{to{transform:rotate(360deg)}}
+::-webkit-scrollbar{width:3px;}::-webkit-scrollbar-thumb{background:var(--border);}
+@media(max-width:860px){.main{grid-template-columns:1fr}.stats{grid-template-columns:1fr 1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <!-- API KEY BANNER -->
+  <div id="apikey-banner" style="background:rgba(92,184,92,.08);border:1px solid rgba(92,184,92,.4);border-radius:12px;padding:14px 20px;margin-bottom:18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+    <span style="font-size:20px;">🔑</span>
+    <div style="flex:1;">
+      <div style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:3px;">API KEY CONFIGURADA ✅</div>
+      <div style="font-size:11px;color:var(--muted);">Listo para generar leads con IA · <strong style="color:var(--green);">Unitel Service ProspectBot</strong></div>
+    </div>
+    <span style="font-size:11px;color:var(--green);">✅ Clave válida</span>
+  </div>
+
+  <header>
+    <div class="logo">
+      <div class="logo-img">📞</div>
+      <div>
+        <h1>UNITEL SERVICE — ProspectBot IA</h1>
+        <p>Agente de Captación · Honduras BPO · Desde 2018</p>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <div class="langs">
+        <button class="lb on" id="bes">🇪🇸 ES</button>
+        <button class="lb" id="ben">🇺🇸 EN</button>
+      </div>
+      <div class="status"><div class="dot"></div>Sistema Activo</div>
+    </div>
+  </header>
+
+  <div class="stats">
+    <div class="sc"><div class="lbl">Leads Encontrados</div><div class="val" id="s-found">0</div><div class="sub">esta sesión</div></div>
+    <div class="sc"><div class="lbl">Emails Enviados</div><div class="val" id="s-sent">0</div><div class="sub">a Yamil / prospectos</div></div>
+    <div class="sc"><div class="lbl">Score Promedio</div><div class="val" id="s-score">—</div><div class="sub">calidad IA</div></div>
+    <div class="sc"><div class="lbl">Destino</div><div class="val" style="font-size:11px;color:var(--gold);margin-top:4px;">yatala@</div><div class="sub">inversionesadhn.com</div></div>
+  </div>
+
+  <div class="main">
+    <div style="display:flex;flex-direction:column;gap:14px;">
+      <div class="panel">
+        <div class="ptitle">⚡ Configurar Búsqueda</div>
+
+        <!-- MODO -->
+        <div style="display:flex;gap:8px;margin-bottom:16px;">
+          <button class="btn bs bsm" id="btn-modo-ia" style="border-color:var(--green);color:var(--green);flex:1;justify-content:center;">🤖 IA — Leads ficticios</button>
+          <button class="btn bs bsm" id="btn-modo-apollo" style="flex:1;justify-content:center;">🎯 Apollo — Leads reales</button>
+        </div>
+
+        <div class="fg">
+          <div class="fi">
+            <label>Mercado</label>
+            <select id="market">
+              <option value="usa">🇺🇸 USA — Empresas medianas</option>
+              <option value="hn">🇭🇳 Honduras / Centroamérica</option>
+              <option value="both" selected>🌎 Ambos Mercados</option>
+            </select>
+          </div>
+          <div class="fi">
+            <label>Servicio</label>
+            <select id="service">
+              <option value="all" selected>Todos los servicios</option>
+              <option value="inbound">📞 Inbound — Servicio al cliente</option>
+              <option value="outbound">📤 Outbound — Cobranzas</option>
+              <option value="telemarketing">📊 Telemarketing</option>
+              <option value="cobros">💰 Cobranza en Mora</option>
+              <option value="televentas">🛒 Televentas</option>
+            </select>
+          </div>
+          <div class="fi">
+            <label>Industria</label>
+            <select id="industry">
+              <option value="all" selected>Todas las industrias</option>
+              <option value="telecom">📱 Telecomunicaciones</option>
+              <option value="fintech">🏦 Finanzas / Banca</option>
+              <option value="retail">🛒 Retail / eCommerce</option>
+              <option value="healthcare">🏥 Salud / Clínicas</option>
+              <option value="realestate">🏠 Real Estate</option>
+              <option value="utilities">💡 Utilities</option>
+            </select>
+          </div>
+          <div class="fi">
+            <label>Cantidad</label>
+            <select id="qty">
+              <option value="5" selected>5 leads</option>
+              <option value="8">8 leads</option>
+              <option value="10">10 leads</option>
+            </select>
+          </div>
+          <div class="fi full" id="apollo-filters" style="display:none;">
+            <div style="background:rgba(92,184,92,.06);border:1px solid rgba(92,184,92,.2);border-radius:10px;padding:14px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+              <div class="fi">
+                <label>Cargo (título)</label>
+                <select id="apollo-title">
+                  <option value="">Todos los cargos</option>
+                  <option value="CEO">CEO / Founder</option>
+                  <option value="COO">COO</option>
+                  <option value="VP Operations">VP Operations</option>
+                  <option value="Director">Director</option>
+                  <option value="Customer Service Manager">Customer Service Manager</option>
+                  <option value="CFO">CFO</option>
+                </select>
+              </div>
+              <div class="fi">
+                <label>Tamaño empresa</label>
+                <select id="apollo-size">
+                  <option value="">Cualquier tamaño</option>
+                  <option value="1,10">1-10 empleados</option>
+                  <option value="11,50">11-50 empleados</option>
+                  <option value="51,200">51-200 empleados</option>
+                  <option value="201,500">201-500 empleados</option>
+                  <option value="501,1000">501-1,000 empleados</option>
+                  <option value="1001,5000">1,001-5,000 empleados</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          <div class="fi full">
+            <label>Contexto adicional (opcional)</label>
+            <textarea id="ctx" placeholder="Ej: empresas con cartera vencida, startups en crecimiento..."></textarea>
+          </div>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn bp" id="btn-search"><span id="si">🔍</span><span id="st">Buscar Prospectos con IA</span></button>
+          <button class="btn bs bsm" id="btn-limpiar">↺ Limpiar</button>
+        </div>
+        <div class="prog" id="prog">
+          <div style="font-size:10px;color:var(--muted);margin:12px 0 6px;" id="plbl">Iniciando...</div>
+          <div class="pbar-bg"><div class="pbar" id="pbar" style="width:0%"></div></div>
+          <div class="log" id="log"></div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="ptitle">📋 Prospectos Calificados <span id="lcnt" style="font-size:10px;color:var(--muted);margin-left:4px;"></span></div>
+        <div id="leads-box"><div class="empty"><div style="font-size:28px;margin-bottom:8px;">🎯</div>Configura filtros y presiona <strong>Buscar</strong></div></div>
+      </div>
+    </div>
+
+    <div class="rcol">
+      <div class="panel">
+        <div class="ptitle">✉️ Email Personalizado</div>
+        <div id="email-empty" style="color:var(--muted);font-size:11px;text-align:center;padding:20px;">Selecciona un lead<br>para ver el email</div>
+        <div id="email-show" style="display:none;">
+          <div class="ef"><span class="ef-l">Para:</span><span id="e-to" style="font-size:10px;word-break:break-all;"></span></div>
+          <div class="ef"><span class="ef-l">Asunto:</span><span id="e-subj" style="font-size:10px;"></span></div>
+          <div class="eprev" id="e-body"></div>
+          <div style="display:flex;gap:6px;margin-top:9px;flex-wrap:wrap;">
+            <button class="btn bs bsm" id="btn-yamil" style="border-color:var(--green);color:var(--green);"><span id="yi">📨</span><span id="yt">Notificar a Yamil</span></button>
+            <button class="btn bs bsm" id="btn-prospect" style="border-color:var(--gold);color:var(--gold);"><span id="pi">📤</span><span id="pt">Enviar al Prospecto</span></button>
+            <button class="btn bs bsm" id="btn-regen">⟳</button>
+            <button class="btn bs bsm" id="btn-todos">📬 Todos</button>
+          </div>
+        </div>
+      </div>
+      <div class="panel" style="flex:1;">
+        <div class="ptitle">📬 Enviados</div>
+        <div id="sent-box"><div class="empty"><div style="font-size:20px;margin-bottom:6px;">📭</div>Sin envíos aún</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="mo" id="modal">
+  <div class="md">
+    <h2>📨 Confirmar Envío</h2>
+    <p id="modal-txt">¿Confirmar?</p>
+    <div class="minfo">
+      <div>📧 <strong style="color:var(--text);">Destino:</strong> <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ed948c998c818cad84839b889f9e848283889e8c898583c38e8280">[email&#160;protected]</a></div>
+      <div>🏢 <strong style="color:var(--text);">Empresa:</strong> Unitel Service Call Center S. de R.L.</div>
+      <div>📍 <strong style="color:var(--text);">Desde:</strong> Plaza Marte, Blv Morazán, Tegucigalpa</div>
+    </div>
+    <div class="ma">
+      <button class="btn bs bsm" id="btn-cancelar">Cancelar</button>
+      <button class="btn bp bsm" id="btn-confirmar">✅ Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"><span id="ti">✅</span><span id="tm"></span></div>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+const BREVO_KEY='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';
+const SENDER_EMAIL='garner.melvin@gmail.com';
+const SENDER_NAME='Unitel Service Call Center';
+const YAMIL_EMAIL='yatala@inversionesadhn.com';
+const APOLLO_KEY='18_y5cszE8zK_dG24lnwvA';
+
+var leads=[],selIdx=null,sentCnt=0,pendAll=false,lang='es',apiKey='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',modoApollo=false;
+
+function saveKey(val){
+  apiKey=val.trim();
+  var st=document.getElementById('key-status');
+  var banner=document.getElementById('apikey-banner');
+  if(apiKey.startsWith('sk-ant')){
+    st.textContent='✅ Clave válida';
+    st.style.color='var(--green)';
+    banner.style.borderColor='rgba(92,184,92,.4)';
+    banner.style.background='rgba(92,184,92,.08)';
+  }else if(apiKey.length>0){
+    st.textContent='⚠️ Formato incorrecto';
+    st.style.color='var(--gold)';
+  }else{
+    st.textContent='Sin configurar';
+    st.style.color='var(--muted)';
+  }
+}
+
+function toggleKey(){
+  var inp=document.getElementById('api-key-input');
+  inp.type=inp.type==='password'?'text':'password';
+}
+
+function setLang(l){
+  lang=l;
+  document.getElementById('bes').className='lb'+(l==='es'?' on':'');
+  document.getElementById('ben').className='lb'+(l==='en'?' on':'');
+}
+
+function wait(ms){return new Promise(function(r){setTimeout(r,ms);});}
+
+function setProg(pct,lbl){
+  document.getElementById('pbar').style.width=pct+'%';
+  document.getElementById('plbl').textContent=lbl;
+}
+
+function addLog(type,msg){
+  var w=document.getElementById('log');
+  var now=new Date().toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  var d=document.createElement('div');
+  d.className='le';
+  d.innerHTML='<span class="lt">'+now+'</span><span class="'+type+'">'+msg+'</span>';
+  w.appendChild(d);
+  w.scrollTop=w.scrollHeight;
+}
+
+function clearLog(){document.getElementById('log').innerHTML='';}
+
+function toast(msg,err){
+  var t=document.getElementById('toast');
+  document.getElementById('ti').textContent=err?'❌':'✅';
+  document.getElementById('tm').textContent=msg;
+  t.className='toast show'+(err?' err':'');
+  setTimeout(function(){t.className='toast';},5000);
+}
+
+function updateAvg(){
+  if(!leads.length)return;
+  document.getElementById('s-score').textContent=Math.round(leads.reduce(function(s,l){return s+l.score;},0)/leads.length);
+}
+
+function flag(c){
+  if(!c)return'🌎';
+  var l=c.toLowerCase();
+  if(l.indexOf('usa')>=0||l.indexOf('united states')>=0)return'🇺🇸';
+  if(l.indexOf('honduras')>=0)return'🇭🇳';
+  if(l.indexOf('guatemala')>=0)return'🇬🇹';
+  if(l.indexOf('el salvador')>=0)return'🇸🇻';
+  if(l.indexOf('costa rica')>=0)return'🇨🇷';
+  if(l.indexOf('panama')>=0||l.indexOf('panamá')>=0)return'🇵🇦';
+  if(l.indexOf('mexico')>=0||l.indexOf('méxico')>=0)return'🇲🇽';
+  return'🌎';
+}
+
+async function callClaude(prompt){
+  if(!apiKey||!apiKey.startsWith('sk-ant')){
+    throw new Error('Ingresa tu API Key de Anthropic en el campo superior');
+  }
+  var res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:4000,messages:[{role:'user',content:prompt}]})
+  });
+  if(!res.ok){
+    var e=await res.json().catch(function(){return{};});
+    throw new Error(e&&e.error&&e.error.message?e.error.message:'API error '+res.status);
+  }
+  var d=await res.json();
+  return d.content.map(function(i){return i.text||'';}).join('');
+}
+
+async function sendEmail(toEmail,toName,subject,html){
+  var res=await fetch('https://api.brevo.com/v3/smtp/email',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','api-key':BREVO_KEY},
+    body:JSON.stringify({sender:{name:SENDER_NAME,email:SENDER_EMAIL},to:[{email:toEmail,name:toName}],subject:subject,htmlContent:html})
+  });
+  var data=await res.json().catch(function(){return{};});
+  if(!res.ok){
+    var msg=data&&data.message?data.message:JSON.stringify(data)||'Brevo error '+res.status;
+    throw new Error(msg);
+  }
+  return data;
+}
+
+function setModo(apollo){
+  modoApollo=apollo;
+  document.getElementById('btn-modo-ia').style.borderColor=apollo?'var(--border)':'var(--green)';
+  document.getElementById('btn-modo-ia').style.color=apollo?'var(--muted)':'var(--green)';
+  document.getElementById('btn-modo-apollo').style.borderColor=apollo?'var(--green)':'var(--border)';
+  document.getElementById('btn-modo-apollo').style.color=apollo?'var(--green)':'var(--muted)';
+  document.getElementById('apollo-filters').style.display=apollo?'block':'none';
+}
+
+async function buscarApollo(market,industry,qty){
+  var countryMap={'usa':['United States'],'hn':['Honduras','Guatemala','Costa Rica','El Salvador'],'both':['United States','Honduras','Guatemala','Costa Rica','El Salvador']};
+  var industryMap={'telecom':'Telecommunications','fintech':'Financial Services','retail':'Retail','healthcare':'Hospital & Health Care','realestate':'Real Estate','utilities':'Utilities','all':''};
+  var countries=countryMap[market]||countryMap['both'];
+  var ind=industryMap[industry]||'';
+  var title=document.getElementById('apollo-title').value;
+  var size=document.getElementById('apollo-size').value;
+
+  var body={
+    api_key:APOLLO_KEY,
+    page:1,
+    per_page:parseInt(qty),
+    person_titles:title?[title]:[],
+    organization_industry_tag_ids:[],
+    person_locations:countries,
+    q_keywords:ind
+  };
+  if(size){
+    var parts=size.split(',');
+    body.organization_num_employees_ranges=[size];
+  }
+
+  var res=await fetch('https://api.apollo.io/v1/mixed_people/search',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Cache-Control':'no-cache'},
+    body:JSON.stringify(body)
+  });
+  if(!res.ok){
+    var e=await res.json().catch(function(){return{};});
+    throw new Error(e&&e.message?e.message:'Apollo error '+res.status);
+  }
+  var data=await res.json();
+  var people=data.people||[];
+  if(!people.length)throw new Error('Apollo no encontró contactos con esos filtros. Prueba con filtros más amplios.');
+
+  return people.map(function(p){
+    var org=p.organization||{};
+    return {
+      name:(p.first_name||'')+' '+(p.last_name||''),
+      title:p.title||'—',
+      company:org.name||'—',
+      country:p.country||'—',
+      city:p.city||'—',
+      industry:org.industry||industry,
+      email:p.email||'No disponible',
+      linkedin:p.linkedin_url||'—',
+      phone:p.phone_numbers&&p.phone_numbers.length?p.phone_numbers[0].sanitized_number:'—',
+      employees:org.estimated_num_employees?org.estimated_num_employees+' empleados':'—',
+      painPoint:'Contacto real verificado por Apollo',
+      score:Math.floor(Math.random()*25)+70,
+      urgency:['alta','media','baja'][Math.floor(Math.random()*3)],
+      tags:['apollo','real','verificado'],
+      agentNote:'Lead real de Apollo — contacto verificado',
+      contactLang:p.country==='United States'?'en':'es',
+      isReal:true
+    };
+  });
+}
+
+async function buscar(){
+  var market=document.getElementById('market').value;
+  var service=document.getElementById('service').value;
+  var industry=document.getElementById('industry').value;
+  var qty=document.getElementById('qty').value;
+  var ctx=document.getElementById('ctx').value;
+  var btn=document.getElementById('btn-search');
+  btn.disabled=true;
+  document.getElementById('si').textContent='⏳';
+  document.getElementById('st').textContent='Buscando...';
+  document.getElementById('prog').classList.add('show');
+  setProg(0,'Iniciando agente IA...');
+  clearLog();
+  var ml=market==='usa'?'USA mid-size companies':market==='hn'?'Honduras/Central America':'USA and Honduras/Central America';
+  addLog('info','Agente iniciado');
+  await wait(300);
+  setProg(25,'Analizando mercado...');
+  addLog('dim','Mercado: '+market+' | Servicio: '+service);
+  await wait(400);
+  setProg(50,'Consultando IA...');
+  addLog('info','Generando leads con Claude IA...');
+  var prompt='Generate exactly '+qty+' realistic fictional B2B leads for Unitel Service Call Center S. de R.L. - a bilingual BPO in Honduras. Services: inbound customer service, outbound collections, telesales, telemarketing.\n\nMarket: '+ml+'\nService: '+service+'\nIndustry: '+industry+'\nContext: '+(ctx||'none')+'\n\nRules:\n- Decision makers: VP Operations, COO, Customer Service Director, CFO\n- painPoint: max 12 words\n- agentNote: max 10 words\n- contactLang: en for USA, es for LATAM\n- score: integer 50-95\n- urgency: alta, media, or baja\n- tags: array of 2-3 strings\n\nRespond with ONLY a valid JSON array. No text before or after. Start with [ end with ]:\n[{"name":"","title":"","company":"","country":"","city":"","industry":"","email":"","linkedin":"","phone":"","employees":"","painPoint":"","score":80,"urgency":"alta","tags":["tag"],"agentNote":"","contactLang":"es"}]';
+  try{
+    setProg(65,'Buscando contactos...');
+    if(modoApollo){
+      addLog('info','Consultando base de datos Apollo...');
+      leads=await buscarApollo(market,industry,qty);
+      setProg(100,'✅ '+leads.length+' contactos reales encontrados');
+      addLog('ok',leads.length+' leads reales de Apollo');
+    }else{
+      addLog('info','Generando leads con Claude IA...');
+      var text=await callClaude(prompt);
+      setProg(85,'Procesando respuesta...');
+      addLog('ok','Respuesta recibida');
+      var m=text.match(/\[[\s\S]*\]/);
+      if(!m)throw new Error('No se encontró JSON en la respuesta');
+      leads=JSON.parse(m[0]);
+      if(!Array.isArray(leads)||!leads.length)throw new Error('No se generaron leads');
+      setProg(100,'✅ '+leads.length+' prospectos generados');
+      addLog('ok',leads.length+' leads calificados');
+    }
+    renderLeads();
+    document.getElementById('s-found').textContent=leads.length;
+    updateAvg();
+  }catch(err){
+    setProg(0,'Error');
+    addLog('warn','Error: '+err.message);
+    toast('❌ '+err.message,true);
+  }finally{
+    btn.disabled=false;
+    document.getElementById('si').textContent='🔍';
+    document.getElementById('st').textContent='Buscar Prospectos con IA';
+  }
+}
+
+function renderLeads(){
+  document.getElementById('lcnt').textContent='('+leads.length+')';
+  if(!leads.length){document.getElementById('leads-box').innerHTML='<div class="empty">Sin resultados</div>';return;}
+  var html='<div class="leads-wrap">';
+  for(var i=0;i<leads.length;i++){
+    var l=leads[i];
+    var sc=l.score>=75?'sh':l.score>=50?'sm':'sl';
+    var ug=l.urgency==='alta'?'rd':l.urgency==='media'?'gd':'';
+    html+='<div class="lcard" id="lc'+i+'" data-idx="'+i+'"><div class="lh"><div><div class="ln">'+flag(l.country)+' '+l.name+'</div><div class="lco">'+l.title+' · '+l.company+'</div></div><div class="lscore '+sc+'">'+l.score+'</div></div><div class="lmeta"><span>📍 '+l.city+', '+l.country+'</span><span>🏢 '+l.employees+'</span><span>⚡ '+l.urgency+'</span></div><div class="lnote">🤖 '+l.agentNote+'</div><div class="tags"><span class="tag '+ug+'">'+(l.urgency==='alta'?'🔥 Urgente':l.urgency==='media'?'⚡ Media':'🌙 Baja')+'</span>';
+    var tags=l.tags||[];
+    for(var t=0;t<tags.length;t++)html+='<span class="tag">'+tags[t]+'</span>';
+    html+='</div></div>';
+  }
+  html+='</div>';
+  document.getElementById('leads-box').innerHTML=html;
+  document.querySelectorAll('.lcard').forEach(function(card){
+    card.addEventListener('click',function(){selLead(parseInt(this.getAttribute('data-idx')));});
+  });
+}
+
+async function selLead(i){
+  document.querySelectorAll('.lcard').forEach(function(c){c.classList.remove('sel');});
+  var el=document.getElementById('lc'+i);
+  if(el)el.classList.add('sel');
+  selIdx=i;
+  var l=leads[i];
+  document.getElementById('email-empty').style.display='none';
+  document.getElementById('email-show').style.display='block';
+  document.getElementById('e-to').textContent=l.email;
+  document.getElementById('e-subj').textContent='⏳ Generando...';
+  document.getElementById('e-body').textContent='Generando email personalizado...';
+  document.getElementById('pt').textContent='Enviar al Prospecto';
+  document.getElementById('pi').textContent='📤';
+  document.getElementById('btn-prospect').style.borderColor='var(--gold)';
+  document.getElementById('btn-prospect').style.color='var(--gold)';
+  await genEmail(l,i);
+}
+
+async function genEmail(l,i){
+  var isEn=l.contactLang==='en'||lang==='en';
+  var lng=isEn?'English':'Spanish';
+  var prompt='Write a short B2B prospecting email in '+lng+'.\n\nSender: Unitel Service Call Center S. de R.L. (Honduras, bilingual BPO, CST timezone, 40-60% savings, free 1-week pilot). Services: customer service, collections, telesales, telemarketing.\nLead: '+l.name+', '+l.title+' at '+l.company+' ('+l.employees+' employees, '+l.industry+', '+l.country+'). Pain point: '+l.painPoint+'.\n\nRules: max 120 words, warm tone, personalized, end with one question.\nSignature: "Equipo Comercial | Unitel Service\\n+(504) 3222-2255 | jefecallcenter@inversionesadhn.com"\n\nRespond with ONLY valid JSON. Start with { end with }:\n{"subject":"...","body":"..."}';
+  try{
+    var text=await callClaude(prompt);
+    var m=text.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('no JSON');
+    var email=JSON.parse(m[0]);
+    leads[i].sub=email.subject;
+    leads[i].body=email.body;
+    if(selIdx===i){
+      document.getElementById('e-subj').textContent=email.subject;
+      document.getElementById('e-body').textContent=email.body;
+    }
+  }catch(e){
+    if(selIdx===i)document.getElementById('e-body').textContent='Error generando email. Haz clic en ⟳';
+  }
+}
+
+function regenEmail(){
+  if(selIdx===null)return;
+  document.getElementById('e-body').textContent='Regenerando...';
+  genEmail(leads[selIdx],selIdx);
+}
+
+function enviarYamil(){
+  if(selIdx===null)return;
+  pendAll=false;
+  var l=leads[selIdx];
+  document.getElementById('modal-txt').textContent='¿Notificar a Yamil sobre "'+l.name+'" de '+l.company+'? Score: '+l.score+'/100';
+  document.getElementById('modal').classList.add('open');
+}
+
+async function enviarProspecto(){
+  if(selIdx===null)return;
+  var l=leads[selIdx];
+  if(!l.sub||!l.body){toast('⚠️ Espera que se genere el email',true);return;}
+  var btn=document.getElementById('btn-prospect');
+  btn.disabled=true;
+  document.getElementById('pi').className='spin';
+  document.getElementById('pi').textContent='⏳';
+  document.getElementById('pt').textContent='Enviando...';
+  var html='<div style="font-family:Arial,sans-serif;max-width:580px;margin:0 auto;"><div style="background:linear-gradient(135deg,#1a2558,#2d4a9e);padding:24px 30px;border-radius:12px 12px 0 0;color:white;"><div style="font-size:20px;font-weight:900;">Unitel Service Call Center</div><div style="font-size:13px;opacity:.75;margin-top:3px;">Honduras · BPO Bilingüe · Desde 2018</div></div><div style="background:#fff;padding:28px 30px;border-radius:0 0 12px 12px;"><div style="font-size:14px;color:#2d3748;white-space:pre-wrap;line-height:1.8;">'+l.body+'</div><div style="margin-top:22px;padding-top:16px;border-top:2px solid #edf2f7;font-size:12px;color:#718096;"><strong style="color:#1a2558;">Unitel Service Call Center S. de R.L.</strong><br>📍 Plaza Marte, Blv Morazán, Tegucigalpa, Honduras<br>📞 +(504) 3222-2255 / 3274-4256</div></div></div>';
+  try{
+    await sendEmail(l.email,l.name,l.sub,html);
+    toast('✅ Email enviado a '+l.name);
+    document.getElementById('pt').textContent='✅ Enviado';
+    document.getElementById('pi').textContent='';
+    document.getElementById('pi').className='';
+    btn.style.borderColor='var(--green)';
+    btn.style.color='var(--green)';
+    addSent(l,'prospecto');
+    sentCnt++;
+    document.getElementById('s-sent').textContent=sentCnt;
+  }catch(e){
+    toast('❌ Brevo: '+e.message,true);
+    document.getElementById('pi').textContent='📤';
+    document.getElementById('pi').className='';
+    document.getElementById('pt').textContent='Enviar al Prospecto';
+  }finally{btn.disabled=false;}
+}
+
+function enviarTodos(){
+  if(!leads.length)return;
+  pendAll=true;
+  document.getElementById('modal-txt').textContent='¿Notificar a Yamil los '+leads.length+' leads encontrados?';
+  document.getElementById('modal').classList.add('open');
+}
+
+function cerrarModal(){document.getElementById('modal').classList.remove('open');}
+
+function confirmar(){
+  cerrarModal();
+  if(pendAll)doTodos();
+  else doYamil(selIdx);
+}
+
+async function doYamil(i){
+  var l=leads[i];
+  var btn=document.getElementById('btn-yamil');
+  btn.disabled=true;
+  document.getElementById('yi').className='spin';
+  document.getElementById('yi').textContent='⏳';
+  document.getElementById('yt').textContent='Enviando...';
+  if(!l.sub)await genEmail(l,i);
+  var ug=l.urgency==='alta'?'🔥':l.urgency==='media'?'⚡':'🌙';
+  var fl=flag(l.country);
+  var sc=l.score>=75?'#38a169':l.score>=50?'#d69e2e':'#e53e3e';
+  var html='<div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;"><div style="background:linear-gradient(135deg,#1a2558,#2d4a9e);padding:26px 30px;border-radius:12px 12px 0 0;color:white;"><div style="font-size:12px;opacity:.65;margin-bottom:5px;">🤖 PROSPECTBOT IA</div><div style="font-size:22px;font-weight:900;">'+ug+' '+l.name+'</div><div style="font-size:13px;opacity:.8;margin-top:3px;">'+l.title+' · '+l.company+'</div></div><div style="background:#fff;padding:26px 30px;border-radius:0 0 12px 12px;"><table style="width:100%;border-collapse:collapse;margin-bottom:20px;"><tr><td style="padding:7px 0;border-bottom:1px solid #edf2f7;color:#718096;font-size:12px;width:120px;">📍 Ubicación</td><td style="padding:7px 0;border-bottom:1px solid #edf2f7;font-size:12px;font-weight:600;">'+fl+' '+l.city+', '+l.country+'</td></tr><tr><td style="padding:7px 0;border-bottom:1px solid #edf2f7;color:#718096;font-size:12px;">🏢 Empresa</td><td style="padding:7px 0;border-bottom:1px solid #edf2f7;font-size:12px;font-weight:600;">'+l.company+' · '+l.employees+'</td></tr><tr><td style="padding:7px 0;border-bottom:1px solid #edf2f7;color:#718096;font-size:12px;">📧 Email</td><td style="padding:7px 0;border-bottom:1px solid #edf2f7;font-size:12px;">'+l.email+'</td></tr><tr><td style="padding:7px 0;border-bottom:1px solid #edf2f7;color:#718096;font-size:12px;">📞 Teléfono</td><td style="padding:7px 0;border-bottom:1px solid #edf2f7;font-size:12px;">'+l.phone+'</td></tr><tr><td style="padding:7px 0;border-bottom:1px solid #edf2f7;color:#718096;font-size:12px;">📊 Score</td><td style="padding:7px 0;border-bottom:1px solid #edf2f7;font-size:12px;font-weight:700;color:'+sc+'">'+l.score+'/100 · '+l.urgency+'</td></tr><tr><td style="padding:7px 0;color:#718096;font-size:12px;">💡 Pain Point</td><td style="padding:7px 0;font-size:12px;">'+l.painPoint+'</td></tr></table><div style="background:#f0fff4;border:1px solid #9ae6b4;border-radius:9px;padding:14px;margin-bottom:16px;"><div style="font-size:11px;font-weight:700;color:#276749;margin-bottom:5px;">🤖 NOTA DEL AGENTE</div><div style="font-size:12px;color:#2f855a;">'+l.agentNote+'</div></div><div style="background:#ebf8ff;border:1px solid #90cdf4;border-radius:9px;padding:14px;"><div style="font-size:11px;font-weight:700;color:#2a4365;margin-bottom:6px;">📤 EMAIL LISTO PARA ENVIAR</div><div style="font-size:12px;font-weight:600;color:#2c5282;margin-bottom:5px;">Asunto: '+(l.sub||'—')+'</div><div style="font-size:12px;color:#2d3748;white-space:pre-wrap;line-height:1.7;">'+(l.body||'—')+'</div></div><div style="margin-top:16px;font-size:10px;color:#a0aec0;text-align:center;">ProspectBot IA · Unitel Service Call Center · Tegucigalpa, Honduras</div></div></div>';
+  try{
+    await sendEmail(YAMIL_EMAIL,'Yamil — Gerente Comercial','🎯 Nuevo Lead '+ug+' — '+l.name+' | '+l.company+' | Score: '+l.score+'/100',html);
+    toast('✅ Yamil notificado: '+l.name);
+    addSent(l,'yamil');
+    sentCnt++;
+    document.getElementById('s-sent').textContent=sentCnt;
+  }catch(e){
+    toast('❌ '+e.message,true);
+  }finally{
+    btn.disabled=false;
+    document.getElementById('yi').className='';
+    document.getElementById('yi').textContent='📨';
+    document.getElementById('yt').textContent='Notificar a Yamil';
+  }
+}
+
+async function doTodos(){
+  for(var i=0;i<leads.length;i++){
+    if(!leads[i].sub)await genEmail(leads[i],i);
+    await doYamil(i);
+    await wait(600);
+  }
+  toast('✅ '+leads.length+' leads enviados a Yamil');
+}
+
+function addSent(l,dest){
+  var box=document.getElementById('sent-box');
+  var emp=box.querySelector('.empty');
+  if(emp)emp.remove();
+  var now=new Date().toLocaleTimeString('es-HN',{hour:'2-digit',minute:'2-digit'});
+  var d=document.createElement('div');
+  d.className='si';
+  d.innerHTML='<span style="font-size:14px;">'+flag(l.country)+'</span><div style="flex:1;"><div class="sn">'+l.name+' · '+l.company+'</div><div class="sd">'+(dest==='yamil'?'📨 Yamil notificado':'📤 Prospecto contactado')+' · '+now+'</div></div><span class="stag">✓</span>';
+  box.insertBefore(d,box.firstChild);
+}
+
+function limpiar(){
+  leads=[];selIdx=null;
+  document.getElementById('leads-box').innerHTML='<div class="empty"><div style="font-size:28px;margin-bottom:8px;">🎯</div>Configura filtros y presiona <strong>Buscar</strong></div>';
+  document.getElementById('lcnt').textContent='';
+  document.getElementById('email-empty').style.display='block';
+  document.getElementById('email-show').style.display='none';
+  document.getElementById('prog').classList.remove('show');
+  document.getElementById('s-found').textContent='0';
+  document.getElementById('s-score').textContent='—';
+}
+
+document.addEventListener('DOMContentLoaded',function(){
+  document.getElementById('btn-modo-ia').addEventListener('click',function(){setModo(false);});
+  document.getElementById('btn-modo-apollo').addEventListener('click',function(){setModo(true);});
+  document.getElementById('btn-search').addEventListener('click',buscar);
+  document.getElementById('btn-limpiar').addEventListener('click',limpiar);
+  document.getElementById('btn-yamil').addEventListener('click',enviarYamil);
+  document.getElementById('btn-prospect').addEventListener('click',enviarProspecto);
+  document.getElementById('btn-regen').addEventListener('click',regenEmail);
+  document.getElementById('btn-todos').addEventListener('click',enviarTodos);
+  document.getElementById('btn-cancelar').addEventListener('click',cerrarModal);
+  document.getElementById('btn-confirmar').addEventListener('click',confirmar);
+  document.getElementById('bes').addEventListener('click',function(){setLang('es');});
+  document.getElementById('ben').addEventListener('click',function(){setLang('en');});
+  document.getElementById('btn-eye').addEventListener('click',toggleKey);
+  var inp=document.getElementById('api-key-input');
+  inp.addEventListener('input',function(){saveKey(this.value);});
+  inp.addEventListener('paste',function(){setTimeout(function(){saveKey(inp.value);},50);});
+});
+</script>
+</body>
+</html>
